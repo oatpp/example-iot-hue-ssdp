@@ -7,8 +7,8 @@
 #include OATPP_CODEGEN_BEGIN(DTO)
 
 /**
- *  Data Transfer Object. Object containing fields only.
- *  Used in API for serialization/deserialization and validation
+ *  The "success" and "error" messages by hue hubs are extremely bad engineered.
+ *  This DTO is a mere try to type their structure...
  */
 
 class ResponseTypeDto : public oatpp::DTO {

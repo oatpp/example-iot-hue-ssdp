@@ -1,12 +1,17 @@
-# Example-CRUD [![Build Status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.example-crud?branchName=master)](https://dev.azure.com/lganzzzo/lganzzzo/_build?definitionId=9?branchName=master)
+# Example-IoT-Hue [![Build Status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.example-crud?branchName=master)](https://dev.azure.com/lganzzzo/lganzzzo/_build?definitionId=9?branchName=master)
 
-Example project how-to create basic CRUD endpoints and document them with Swagger-UI and OpenApi 3.0.0
+Example project how-to create an Philips Hue compatible REST-API that is discovered and controllable by Hue compatible Smart-Home devices like Amazon Alexa or Google Echo.
+
+For this discoverability, an UDP/SSDP stack is implemented.
+
+This REST-API was implemented with the help of the Hue API unofficial reference documentation by burgestrand.se
 
 See more:
 
 - [Oat++ Website](https://oatpp.io/)
 - [Oat++ Github Repository](https://github.com/oatpp/oatpp)
 - [Get Started](https://oatpp.io/docs/start)
+- [Philips Hue API — Unofficial Reference Documentation](http://www.burgestrand.se/hue-api/)
 
 ## Overview
 
@@ -18,6 +23,7 @@ This project is using [oatpp](https://github.com/oatpp/oatpp) and [oatpp-swagger
 |- CMakeLists.txt                        // projects CMakeLists.txt
 |- src/
 |   |
+|   |- connection/                       // Folder where the UDP/SSDP stack is implemented
 |   |- controller/                       // Folder containing UserController where all endpoints are declared
 |   |- db/                               // Folder with database mock
 |   |- dto/                              // DTOs are declared here
@@ -44,90 +50,75 @@ script to install required oatpp modules.
 $ mkdir build && cd build
 $ cmake ..
 $ make 
-$ ./crud-exe        # - run application.
+$ ./example-iot-hue-exe        # - run application.
 ```
 
 #### In Docker
 
 ```
-$ docker build -t example-crud .
-$ docker run -p 8000:8000 -t example-crud
+$ docker build -t example-iot-hue .
+$ docker run -p 8000:8000 -t example-iot-hue
 ```
 
 ---
 
 ### Endpoints declaration
 
-#### Create User
+All implemented endpoints are compatible to a Philips Hue bridge (V1 and V3).
+**Their path and structure are fixed!**
 
+#### SSDP: Search Responder
 ```c++
-ENDPOINT_INFO(createUser) {
-  info->summary = "Create new User";
-  info->addConsumes<Object<UserDto>>("application/json");
-  info->addResponse<Object<UserDto>>(Status::CODE_200, "application/json");
-}
-ENDPOINT("POST", "demo/api/users", createUser,
-         BODY_DTO(Object<UserDto>, userDto)) {
-  return createDtoResponse(Status::CODE_200, m_database->createUser(userDto));
-}
+ENDPOINT("M-SEARCH", "*", star)
+```
+This Endpoint accepts and answers to `M-SEARCH` SSDP packets like a Philips Hue hub would do.
+
+#### HTTP: description.xml
+```c++
+ENDPOINT("GET", "/description.xml", description)
+```
+In the discovery answer, a reference to this endpoint is send back.
+This endpoints emulates a static `desciption.xml` which includes all necessary information required to act as an Philips Hue hub.
+
+See [Bridge discovery (burgestrand.se)](http://www.burgestrand.se/hue-api/api/discovery/)
+
+#### HTTP: One-Shot 'user' registration
+```c++
+ENDPOINT("POST", "/api", appRegister, BODY_DTO(oatpp::Object<UserRegisterDto>, userRegister))
 ```
 
-#### Update User
+This endpoint just emulates a valid user-registration on a Philips Hue hub.
 
+See [Application registration (burgestrand.se)](http://www.burgestrand.se/hue-api/api/auth/registration/)
+
+#### HTTP: Get all 'lights'
 ```c++
-ENDPOINT_INFO(putUser) {
-  info->summary = "Update User by userId";
-  info->addConsumes<Object<UserDto>>("application/json");
-  info->addResponse<Object<UserDto>>(Status::CODE_200, "application/json");
-  info->addResponse<String>(Status::CODE_404, "text/plain");
-}
-ENDPOINT("PUT", "demo/api/users/{userId}", putUser,
-         PATH(Int32, userId),
-         BODY_DTO(Object<UserDto>, userDto)) {
-  userDto->id = userId;
-  return createDtoResponse(Status::CODE_200, m_database->updateUser(userDto));
-}
+ENDPOINT("GET", "/api/{username}/lights", getLights, PATH(String, username))
 ```
 
-#### Get one User
+This endpoint returns a **object** of all devices in a Philips Hue compatible fashion.
+However, formally this endpoint should just return the names. But returning the full list is fine too.
 
+See [Lights (burgestrand.se)](http://www.burgestrand.se/hue-api/api/lights/)
+
+#### HTTP: Get state of a specific light
 ```c++
-ENDPOINT_INFO(getUserById) {
-  info->summary = "Get one User by userId";
-  info->addResponse<Object<UserDto>>(Status::CODE_200, "application/json");
-  info->addResponse<String>(Status::CODE_404, "text/plain");
-}
-ENDPOINT("GET", "demo/api/users/{userId}", getUserById,
-         PATH(Int32, userId)) {
-  auto user = m_database->getUserById(userId);
-  OATPP_ASSERT_HTTP(user, Status::CODE_404, "User not found");
-  return createDtoResponse(Status::CODE_200, user);
-}
+ENDPOINT("GET", "/api/{username}/lights/{hueId}", getLight, PATH(String, username), PATH(Int32, hueId))
+```
+This endpoint returns the state of the light given in `{hueId}` in a Philips Hue compatible fashion.
+
+See [Lights (burgestrand.se)](http://www.burgestrand.se/hue-api/api/lights/)
+
+#### HTTP: Set state of a specific light
+```c++
+ENDPOINT("PUT", "/api/{username}/lights/{hueId}/state", updateState,
+      PATH(String, username),
+      PATH(Int32, hueId),
+      BODY_DTO(Object<HueDeviceStateDto>, state))
 ```
 
-#### Get list of users
+This endpoint accepts a Philips Hue compatible state-object and sets the state in the internal database accordingly.
+It is called e.g. by Alexa if you tell it  "Alexa, turn on <devicename>".
+Finally it returns a "success" or "error" object.
 
-```c++
-ENDPOINT_INFO(getUsers) {
-  info->summary = "get all stored users";
-  info->addResponse<List<Object<UserDto>>>(Status::CODE_200, "application/json");
-}
-ENDPOINT("GET", "demo/api/users", getUsers) {
-  return createDtoResponse(Status::CODE_200, m_database->getUsers());
-}
-```
-
-#### Delete User
-```c++
-ENDPOINT_INFO(deleteUser) {
-  info->summary = "Delete User by userId";
-  info->addResponse<String>(Status::CODE_200, "text/plain");
-  info->addResponse<String>(Status::CODE_404, "text/plain");
-}
-ENDPOINT("DELETE", "demo/api/users/{userId}", deleteUser,
-         PATH(Int32, userId)) {
-  bool success = m_database->deleteUser(userId);
-  OATPP_ASSERT_HTTP(success, Status::CODE_417, "User not deleted. Perhaps no such User in the Database");
-  return createResponse(Status::CODE_200, "User successfully deleted");
-}  
-```
+See [Lights (burgestrand.se)](http://www.burgestrand.se/hue-api/api/lights/)

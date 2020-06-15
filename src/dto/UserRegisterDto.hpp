@@ -7,8 +7,7 @@
 #include OATPP_CODEGEN_BEGIN(DTO)
 
 /**
- *  Data Transfer Object. Object containing fields only.
- *  Used in API for serialization/deserialization and validation
+ *  The Object send by connecting devices (i.E. Alexa) to initially register them on this 'hub'
  */
 class UserRegisterDto : public oatpp::DTO {
 
