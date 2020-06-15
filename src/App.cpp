@@ -58,16 +58,19 @@ void run() {
   });
 
   std::thread ssdp([components](){
-    oatpp::network::server::Server server(components->udpConnectionProvider.getObject(),
-                                          components->udpConnectionHandler.getObject());
+    oatpp::network::server::Server server(components->ssdpConnectionProvider.getObject(),
+                                          components->ssdpStreamHandler.getObject());
 
-    OATPP_LOGD("Server", "Running SSDP on port %s...", components->udpConnectionProvider.getObject()->getProperty("port").toString()->c_str());
+    OATPP_LOGD("Server", "Running SSDP on port %s...", components->ssdpConnectionProvider.getObject()->getProperty("port").toString()->c_str());
 
     server.run();
   });
 
-  http.join();
-  ssdp.join();
+  if (http.joinable())
+    http.join();
+
+  if (ssdp.joinable())
+    ssdp.join();
 
 }
 

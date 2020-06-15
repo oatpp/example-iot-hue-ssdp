@@ -6,13 +6,15 @@ set(CMAKE_CXX_STANDARD 11)
 add_library(iot-hue-lib
         src/AppComponent.hpp
         src/SwaggerComponent.hpp
+        src/DeviceDescriptorComponent.hpp
         src/controller/HueDeviceController.hpp
+        src/controller/SsdpController.hpp
         src/db/Database.cpp
         src/db/Database.hpp
         src/db/model/HueDevice.hpp
         src/dto/HueDeviceDto.hpp
         src/dto/UserRegisterDto.hpp
-        src/dto/GenericResponseDto.hpp src/controller/SsdpController.hpp src/DeviceDescriptorComponent.hpp)
+        src/dto/GenericResponseDto.hpp)
 
 ## include directories
 
@@ -23,10 +25,12 @@ target_include_directories(iot-hue-lib PUBLIC src)
 
 find_package(oatpp          1.1.0 REQUIRED)
 find_package(oatpp-swagger  1.1.0 REQUIRED)
+find_package(oatpp-ssdp  1.1.0 REQUIRED)
 
 target_link_libraries(iot-hue-lib
         PUBLIC oatpp::oatpp
         PUBLIC oatpp::oatpp-swagger
+        PUBLIC oatpp::oatpp-ssdp
 )
 
 ## define path to swagger-ui res folder
@@ -36,7 +40,7 @@ add_definitions(-DOATPP_SWAGGER_RES_PATH="${OATPP_BASE_DIR}/bin/oatpp-swagger/re
 
 ## add executables
 
-add_executable(iot-hue-exe src/App.cpp src/connection/SimpleUDPConnectionProvider.cpp src/connection/SimpleUDPConnectionProvider.hpp)
+add_executable(iot-hue-exe src/App.cpp)
 target_link_libraries(iot-hue-exe iot-hue-lib)
 
 add_executable(iot-hue-test

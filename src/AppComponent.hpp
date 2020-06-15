@@ -2,7 +2,6 @@
 #ifndef AppComponent_hpp
 #define AppComponent_hpp
 
-#include <connection/SimpleUDPConnectionProvider.hpp>
 #include "db/Database.hpp"
 
 #include "SwaggerComponent.hpp"
@@ -11,6 +10,9 @@
 #include "oatpp/web/server/HttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
 #include "oatpp/network/server/SimpleTCPConnectionProvider.hpp"
+
+#include "oatpp-ssdp/SimpleSsdpUdpStreamProvider.hpp"
+#include "oatpp-ssdp/SsdpStreamHandler.hpp"
 
 #include "oatpp/parser/json/mapping/Serializer.hpp"
 #include "oatpp/parser/json/mapping/Deserializer.hpp"
@@ -38,8 +40,8 @@ public:
     return oatpp::network::server::SimpleTCPConnectionProvider::createShared(80);
   }());
 
-  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, udpConnectionProvider)("udpConnectionProvider", [] {
-    return oatpp::network::server::SimpleUDPConnectionProvider::createShared(1900);
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::ssdp::UdpStreamProvider>, ssdpConnectionProvider)("ssdpConnectionProvider", [] {
+    return oatpp::ssdp::SimpleSsdpUdpStreamProvider::createShared();
   }());
   
   /**
@@ -64,9 +66,9 @@ public:
   /**
    *  Create ConnectionHandler component which uses Router component to route requests
    */
-  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, udpConnectionHandler)("ssdpConnectionHandler", [] {
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::ssdp::SsdpStreamHandler>, ssdpStreamHandler)("ssdpStreamHandler", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router, "ssdpRouter"); // get Router component
-    return oatpp::web::server::HttpConnectionHandler::createShared(router);
+    return oatpp::ssdp::SsdpStreamHandler::createShared(router);
   }());
   
   /**

@@ -49,7 +49,7 @@ class SsdpController : public oatpp::web::server::api::ApiController {
    *  Insert Your endpoints here !!!
    */
   ENDPOINT("M-SEARCH", "*", star) {
-    // OATPP_LOGD("SsdpController", "'M-SEARCH *' Received");
+    OATPP_LOGD("SsdpController", "'M-SEARCH *' Received");
     auto rsp = createResponse(Status::CODE_200, oatpp::String(""));
     rsp->putHeader("CACHE-CONTROL", "max-age=100");
     rsp->putHeader("EXT", "");
