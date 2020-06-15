@@ -5,7 +5,7 @@
 #include "oatpp/core/Types.hpp"
 
 /**
- *  Object of HueDevice stored in the Demo-Database
+ *  Object of HueDevice stored in the Demo-Database.
  */
 class HueDevice {
 public:

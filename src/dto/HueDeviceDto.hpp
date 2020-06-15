@@ -6,6 +6,10 @@
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
+/*
+ * DTOs to replicate the JSON's send and received for philips hue lights
+ */
+
 class HueDeviceCapabilitiesDto : public oatpp::DTO {
 
   DTO_INIT(HueDeviceCapabilitiesDto, DTO);
@@ -33,10 +37,6 @@ class HueDeviceStateDto : public oatpp::DTO {
   DTO_FIELD(Boolean, reachable) = true;
 };
 
-/**
- *  Data Transfer Object. Object containing fields only.
- *  Used in API for serialization/deserialization and validation
- */
 class HueDeviceDto : public oatpp::DTO {
   
   DTO_INIT(HueDeviceDto, DTO);

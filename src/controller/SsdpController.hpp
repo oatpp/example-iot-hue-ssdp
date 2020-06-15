@@ -28,6 +28,10 @@ class SsdpController : public oatpp::web::server::api::ApiController {
    *  Inject Database component
    */
   OATPP_COMPONENT(std::shared_ptr<Database>, m_database);
+
+  /**
+   * Inject DeviceDescriptor component to easily syncronize all device specific data
+   */
   OATPP_COMPONENT(std::shared_ptr<DeviceDescriptorComponent::DeviceDescriptor>, m_desc);
  public:
 
@@ -40,13 +44,12 @@ class SsdpController : public oatpp::web::server::api::ApiController {
     return std::make_shared<SsdpController>(objectMapper);
   }
 
-  /**
-   *  Begin ENDPOINTs generation ('ApiController' codegen)
-   */
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
   /**
-   *  Insert Your endpoints here !!!
+   *  Other devices that want to discover you send 'M-SEARCH *' SSDP packages.
+   *  You have to answer with a corresponding packet on this discovery.
+   *  Here we answer with a Packet that mimics a Philips hue hub.
    */
   ENDPOINT("M-SEARCH", "*", star) {
     OATPP_LOGD("SsdpController", "'M-SEARCH *' Received");
@@ -60,9 +63,6 @@ class SsdpController : public oatpp::web::server::api::ApiController {
     return rsp;
   }
 
-  /**
-   *  Finish ENDPOINTs generation ('ApiController' codegen)
-   */
 #include OATPP_CODEGEN_END(ApiController)
 
 };

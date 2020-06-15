@@ -45,7 +45,7 @@ public:
   }());
   
   /**
-   *  Create Router component
+   *  Create Router components
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, httpRouter)("httpRouter", [] {
     return oatpp::web::server::HttpRouter::createShared();

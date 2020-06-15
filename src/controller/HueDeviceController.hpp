@@ -66,6 +66,9 @@ public:
    */
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
+  ENDPOINT_INFO(description) {
+    info->description = "Answers with a correct XML-Description for this hue-hub implementation";
+  }
   ENDPOINT("GET", "/description.xml", description) {
     OATPP_LOGD("HueDeviceController", "Request for description");
     oatpp::String xml =
@@ -95,7 +98,7 @@ public:
   }
 
   ENDPOINT_INFO(appRegister) {
-    info->description = "Handles the HUE-User Registration";
+    info->description = "Handles the Hue-User Registration. Creates a random username is none is provided in the UserRegisterDto.";
     info->addConsumes<oatpp::Object<UserRegisterDto>>("application/json");
     info->addResponse<oatpp::Object<ResponseTypeDto>>(Status::CODE_200, "application/json");
   }
@@ -116,6 +119,10 @@ public:
     return addHueHeaders(response);
   }
 
+  ENDPOINT_INFO(getLights) {
+    info->description = "Lists all available 'lights' known to this 'hub'";
+    info->addResponse<Fields<oatpp::Object<HueDeviceDto>>>(Status::CODE_200, "application/json");
+  }
   ENDPOINT("GET", "/api/{username}/lights", getLights, PATH(String, username)) {
     OATPP_LOGD("HueDeviceController", "GET on /api/{username}/lights");
     // list all
@@ -130,6 +137,10 @@ public:
     return addHueHeaders(createDtoResponse(Status::CODE_200, response));
   }
 
+  ENDPOINT_INFO(getLight) {
+    info->description = "Returns the state of 'light' no. `hueId`.";
+    info->addResponse<oatpp::Object<ResponseTypeDto>>(Status::CODE_200, "application/json");
+  }
   ENDPOINT("GET", "/api/{username}/lights/{hueId}", getLight, PATH(String, username), PATH(Int32, hueId)) {
     OATPP_LOGD("HueDeviceController", "GET on /api/%s/lights/%d", username->c_str(), *hueId.get());
     // list all
@@ -150,6 +161,11 @@ public:
     return addHueHeaders(createDtoResponse(Status::CODE_200, specific));
   }
 
+  ENDPOINT_INFO(updateState) {
+    info->description = "Sets the state for 'light' no. `hueId`. This endpoint is called by devices (i.E. Alexa) to control a light";
+    info->addConsumes<oatpp::Object<HueDeviceStateDto>>("application/json");
+    info->addResponse<oatpp::Object<ResponseTypeDto>>(Status::CODE_200, "application/json");
+  }
   ENDPOINT("PUT", "/api/{username}/lights/{hueId}/state", updateState,
       PATH(String, username),
       PATH(Int32, hueId),
@@ -168,6 +184,11 @@ public:
       responseDto->back()->error = {{oatpp::String(num), state->on}};
       auto response = createDtoResponse(Status::CODE_200, responseDto);
     }
+
+    /*
+     * ToDo: Implement your "light turning on/off" here!
+     * Better: Replace the Database with your state and control logic so the "database" is in sync to your logic.
+     */
 
     responseDto->push_back(oatpp::Object<ResponseTypeDto>::createShared());
     memset(num, 0, 32);
