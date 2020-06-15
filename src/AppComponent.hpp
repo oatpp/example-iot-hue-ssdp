@@ -51,6 +51,9 @@ public:
     return oatpp::web::server::HttpRouter::createShared();
   }());
 
+  /**
+   * We can reuse the HttpRouter for SSDP since both SSDP and HTTP use the same Header structure
+   */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, ssdpRouter)("ssdpRouter", [] {
     return oatpp::web::server::HttpRouter::createShared();
   }());
@@ -64,7 +67,8 @@ public:
   }());
 
   /**
-   *  Create ConnectionHandler component which uses Router component to route requests
+   *  Create SsdpStreamHandler component which uses Router component to route requests.
+   *  It looks like a normal ConnectionHandler but is specialized on SsdpStreams and returns something conceptually very different
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::ssdp::SsdpStreamHandler>, ssdpStreamHandler)("ssdpStreamHandler", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router, "ssdpRouter"); // get Router component

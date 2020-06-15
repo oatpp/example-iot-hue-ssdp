@@ -15,7 +15,7 @@ See more:
 
 ## Overview
 
-This project is using [oatpp](https://github.com/oatpp/oatpp) and [oatpp-swagger](https://github.com/oatpp/oatpp-swagger) modules.
+This project is using [oatpp](https://github.com/oatpp/oatpp), [oatpp-swagger](https://github.com/oatpp/oatpp-swagger) and  [oatpp-ssdp](https://github.com/oatpp/oatpp-ssdp) modules.
 
 ### Project layout
 
@@ -23,7 +23,6 @@ This project is using [oatpp](https://github.com/oatpp/oatpp) and [oatpp-swagger
 |- CMakeLists.txt                        // projects CMakeLists.txt
 |- src/
 |   |
-|   |- connection/                       // Folder where the UDP/SSDP stack is implemented
 |   |- controller/                       // Folder containing UserController where all endpoints are declared
 |   |- db/                               // Folder with database mock
 |   |- dto/                              // DTOs are declared here
@@ -43,7 +42,7 @@ This project is using [oatpp](https://github.com/oatpp/oatpp) and [oatpp-swagger
 
 **Requires**
 
-- `oatpp` and `oatpp-swagger` modules installed. You may run `utility/install-oatpp-modules.sh` 
+- `oatpp`, `oatpp-ssdp` and `oatpp-swagger` modules installed. You may run `utility/install-oatpp-modules.sh` 
 script to install required oatpp modules.
 
 ```
