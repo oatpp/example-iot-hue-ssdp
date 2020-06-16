@@ -70,14 +70,14 @@ script to install required oatpp modules.
 $ mkdir build && cd build
 $ cmake ..
 $ make 
-$ ./example-iot-hue-exe        # - run application.
+$ ./example-iot-hue-ssdp-exe        # - run application.
 ```
 
 #### In Docker
 
 ```
-$ docker build -t example-iot-hue .
-$ docker run -p 8000:8000 -t example-iot-hue
+$ docker build -t example-iot-hue-ssdp .
+$ docker run -p 8000:8000 -t example-iot-hue-ssdp
 ```
 
 ---
