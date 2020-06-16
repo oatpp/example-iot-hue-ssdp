@@ -40,7 +40,7 @@ public:
     return oatpp::network::server::SimpleTCPConnectionProvider::createShared(80);
   }());
 
-  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::ssdp::UdpStreamProvider>, ssdpConnectionProvider)("ssdpConnectionProvider", [] {
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::ssdp::SimpleSsdpUdpStreamProvider>, ssdpConnectionProvider)("ssdpConnectionProvider", [] {
     return oatpp::ssdp::SimpleSsdpUdpStreamProvider::createShared();
   }());
   
