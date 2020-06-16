@@ -2,13 +2,13 @@
 #ifndef DeviceDescriptorComponent_hpp
 #define DeviceDescriptorComponent_hpp
 
-#include <oatpp/core/Types.hpp>
-#include <oatpp/core/macro/component.hpp>
+#include "oatpp/core/Types.hpp"
+#include "oatpp/core/macro/component.hpp"
 
 class DeviceDescriptorComponent {
- public:
+public:
   class DeviceDescriptor {
-   public:
+  public:
     oatpp::String sn;
     oatpp::String uuid;
     oatpp::String ipPort;

@@ -2,10 +2,11 @@
 #ifndef SsdpController_hpp
 #define SsdpController_hpp
 
-#include "../db/Database.hpp"
+#include "DeviceDescriptorComponent.hpp"
+#include "db/Database.hpp"
 
-#include "../dto/UserRegisterDto.hpp"
-#include "../dto/GenericResponseDto.hpp"
+#include "dto/UserRegisterDto.hpp"
+#include "dto/GenericResponseDto.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"

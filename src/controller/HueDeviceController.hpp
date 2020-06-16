@@ -2,16 +2,20 @@
 #ifndef HueDeviceController_hpp
 #define HueDeviceController_hpp
 
-#include <DeviceDescriptorComponent.hpp>
-#include "../db/Database.hpp"
+#include "DeviceDescriptorComponent.hpp"
 
-#include "../dto/UserRegisterDto.hpp"
-#include "../dto/GenericResponseDto.hpp"
+#include "db/Database.hpp"
+
+#include "dto/UserRegisterDto.hpp"
+#include "dto/GenericResponseDto.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
+
+
+#include OATPP_CODEGEN_BEGIN(ApiController) //< Begin codegen section
 
 /**
  *  EXAMPLE ApiController
@@ -22,17 +26,16 @@ class HueDeviceController : public oatpp::web::server::api::ApiController {
 public:
   HueDeviceController(const std::shared_ptr<ObjectMapper>& objectMapper)
     : oatpp::web::server::api::ApiController(objectMapper)
-  {
-  }
+  {}
 private:
-  
+
   /**
    *  Inject Database component
    */
   OATPP_COMPONENT(std::shared_ptr<Database>, m_database);
   OATPP_COMPONENT(std::shared_ptr<DeviceDescriptorComponent::DeviceDescriptor>, m_desc);
 public:
-  
+
   /**
    *  Inject @objectMapper component here as default parameter
    *  Do not return bare Controllable* object! use shared_ptr!
@@ -44,9 +47,9 @@ public:
 
   void gen_random(char *s, const int len) {
     static const char alphanum[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
+      "0123456789"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      "abcdefghijklmnopqrstuvwxyz";
 
     for (int i = 0; i < len; ++i) {
       s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
@@ -61,40 +64,38 @@ public:
     return rsp;
   }
 
-  /**
-   *  Begin ENDPOINTs generation ('ApiController' codegen)
-   */
-#include OATPP_CODEGEN_BEGIN(ApiController)
-
   ENDPOINT_INFO(description) {
     info->description = "Answers with a correct XML-Description for this hue-hub implementation";
   }
   ENDPOINT("GET", "/description.xml", description) {
-    OATPP_LOGD("HueDeviceController", "Request for description");
-    oatpp::String xml =
-        "<?xml version=\"1.0\"?>"
-        "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">"
-          "<specVersion>"
-            "<major>1</major>"
-            "<minor>0</minor>"
-          "</specVersion>"
-          "<URLBase>http://" + m_desc->ipPort + "/</URLBase>"
-          "<device>"
-            "<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>"
-            "<friendlyName>Philips hue (" + m_desc->ipPort + ")</friendlyName>"
-            "<manufacturer>Royal Philips Electronics</manufacturer>"
-            "<manufacturerURL>http://www.philips.com</manufacturerURL>"
-            "<modelDescription>Philips hue Personal Wireless Lighting</modelDescription>"
-            "<modelName>Philips hue bridge 2012</modelName>"
-            "<modelNumber>" + m_desc->sn + "</modelNumber>"
-            "<modelURL>http://www.meethue.com</modelURL>"
-            "<serialNumber>" + m_desc->mac + "</serialNumber>"
-            "<UDN>uuid:" + m_desc->uuid + "</UDN>"
-            "<presentationURL>index.html</presentationURL>"
-          "</device>"
-        "</root>";
 
-    return addHueHeaders(createResponse(Status::CODE_200, xml));
+    OATPP_LOGD("HueDeviceController", "Request for description");
+
+    oatpp::data::stream::BufferOutputStream ss;
+    ss <<
+      "<?xml version=\"1.0\"?>\n"
+      "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
+      "  <specVersion>\n"
+      "    <major>1</major>\n"
+      "    <minor>0</minor>\n"
+      "  </specVersion>\n"
+      "  <URLBase>http://" << m_desc->ipPort << "/</URLBase>\n"
+      "  <device>\n"
+      "    <deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\n"
+      "    <friendlyName>Philips hue (" << m_desc->ipPort << ")</friendlyName>\n"
+      "    <manufacturer>Royal Philips Electronics</manufacturer>\n"
+      "    <manufacturerURL>http://www.philips.com</manufacturerURL>\n"
+      "    <modelDescription>Philips hue Personal Wireless Lighting</modelDescription>\n"
+      "    <modelName>Philips hue bridge 2012</modelName>\n"
+      "    <modelNumber>" << m_desc->sn << "</modelNumber>\n"
+      "    <modelURL>http://www.meethue.com</modelURL>\n"
+      "    <serialNumber>" << m_desc->mac << "</serialNumber>\n"
+      "    <UDN>uuid:" + m_desc->uuid + "</UDN>\n"
+      "    <presentationURL>index.html</presentationURL>\n"
+      "  </device>\n"
+      "</root>";
+
+    return addHueHeaders(createResponse(Status::CODE_200, ss.toString()));
   }
 
   ENDPOINT_INFO(appRegister) {
@@ -102,7 +103,9 @@ public:
     info->addConsumes<oatpp::Object<UserRegisterDto>>("application/json");
     info->addResponse<oatpp::Object<ResponseTypeDto>>(Status::CODE_200, "application/json");
   }
-  ENDPOINT("POST", "/api", appRegister, BODY_DTO(oatpp::Object<UserRegisterDto>, userRegister)) {
+  ENDPOINT("POST", "/api", appRegister,
+           BODY_DTO(oatpp::Object<UserRegisterDto>, userRegister))
+  {
     if (userRegister->username == nullptr) {
       userRegister->username = "OatppSsdpHueDefaultUser_________________";
       gen_random((char*)userRegister->username->getData()+23, 17);
@@ -123,7 +126,9 @@ public:
     info->description = "Lists all available 'lights' known to this 'hub'";
     info->addResponse<Fields<oatpp::Object<HueDeviceDto>>>(Status::CODE_200, "application/json");
   }
-  ENDPOINT("GET", "/api/{username}/lights", getLights, PATH(String, username)) {
+  ENDPOINT("GET", "/api/{username}/lights", getLights,
+           PATH(String, username))
+  {
     OATPP_LOGD("HueDeviceController", "GET on /api/{username}/lights");
     // list all
     auto devices = m_database->getHueDevices();
@@ -141,7 +146,10 @@ public:
     info->description = "Returns the state of 'light' no. `hueId`.";
     info->addResponse<oatpp::Object<ResponseTypeDto>>(Status::CODE_200, "application/json");
   }
-  ENDPOINT("GET", "/api/{username}/lights/{hueId}", getLight, PATH(String, username), PATH(Int32, hueId)) {
+  ENDPOINT("GET", "/api/{username}/lights/{hueId}", getLight,
+           PATH(String, username),
+           PATH(Int32, hueId))
+  {
     OATPP_LOGD("HueDeviceController", "GET on /api/%s/lights/%d", username->c_str(), *hueId.get());
     // list all
     if (hueId == 0) {
@@ -167,9 +175,10 @@ public:
     info->addResponse<oatpp::Object<ResponseTypeDto>>(Status::CODE_200, "application/json");
   }
   ENDPOINT("PUT", "/api/{username}/lights/{hueId}/state", updateState,
-      PATH(String, username),
-      PATH(Int32, hueId),
-      BODY_DTO(Object<HueDeviceStateDto>, state)) {
+           PATH(String, username),
+           PATH(Int32, hueId),
+           BODY_DTO(Object<HueDeviceStateDto>, state))
+  {
     OATPP_LOGD("HueDeviceController", "PUT on /api/%s/lights/%d/state", username->c_str(), *hueId.get());
     v_int32 id = hueId;
     id--;
@@ -204,11 +213,8 @@ public:
     return addHueHeaders(response);
   }
 
-  /**
-   *  Finish ENDPOINTs generation ('ApiController' codegen)
-   */
-#include OATPP_CODEGEN_END(ApiController)
-  
 };
+
+#include OATPP_CODEGEN_END(ApiController) //< End of codegen section
 
 #endif /* HueDeviceController_hpp */

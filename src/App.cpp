@@ -1,13 +1,14 @@
 
+#include "controller/SsdpController.hpp"
 #include "controller/HueDeviceController.hpp"
-#include "./AppComponent.hpp"
+#include "AppComponent.hpp"
 
 #include "oatpp-swagger/Controller.hpp"
+
 #include "oatpp/network/server/Server.hpp"
 
 #include <iostream>
 #include <thread>
-#include <controller/SsdpController.hpp>
 
 /**
  *  run() method.
