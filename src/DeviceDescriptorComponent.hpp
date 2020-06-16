@@ -18,7 +18,7 @@ class DeviceDescriptorComponent {
   OATPP_CREATE_COMPONENT(std::shared_ptr<DeviceDescriptor>, deviceDescriptor)("deviceDescriptor", [] {
     auto desc = std::make_shared<DeviceDescriptor>();
     // ToDo: Add your machines Address and Port here! You have to come up with your own way to automate this...
-    desc->ipPort = "192.168.166.136:80"; // your real IP and Port your HTTP-Controller is running on
+    desc->ipPort = "192.168.100.100:80"; // your real IP and Port your HTTP-Controller is running on
 
     // assignable
     desc->mac = "be5t0a70cafe"; // can be a fake one

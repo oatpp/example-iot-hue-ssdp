@@ -25,13 +25,13 @@
  */
 class AppComponent {
 public:
-  
+
+  DeviceDescriptorComponent deviceComponent;
+
   /**
    *  Swagger component
    */
   SwaggerComponent swaggerComponent;
-
-  DeviceDescriptorComponent deviceComponent;
   
   /**
    *  Create ConnectionProvider component which listens on the port

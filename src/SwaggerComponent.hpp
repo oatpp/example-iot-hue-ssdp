@@ -17,20 +17,22 @@ public:
    *  General API docs info
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, swaggerDocumentInfo)([] {
-    
+
+    OATPP_COMPONENT(std::shared_ptr<DeviceDescriptorComponent::DeviceDescriptor>, desc);
+
     oatpp::swagger::DocumentInfo::Builder builder;
     
     builder
-    .setTitle("User entity service")
-    .setDescription("CRUD API Example project with swagger docs")
+    .setTitle("Example IoT Phillips Hue service")
+    .setDescription("Example project how-to create an Philips Hue compatible REST-API that is discovered and controllable by Hue compatible Smart-Home devices like Amazon Alexa or Google Echo.")
     .setVersion("1.0")
-    .setContactName("Ivan Ovsyanochka")
+    .setContactName("Mia Vallace")
     .setContactUrl("https://oatpp.io/")
     
     .setLicenseName("Apache License, Version 2.0")
     .setLicenseUrl("http://www.apache.org/licenses/LICENSE-2.0")
     
-    .addServer("http://localhost:80", "server on localhost");
+    .addServer("http://" + desc->ipPort, "server on " + desc->ipPort);
     
     return builder.build();
     

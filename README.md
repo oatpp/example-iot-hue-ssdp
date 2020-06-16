@@ -2,7 +2,7 @@
 
 Example project how-to create an Philips Hue compatible REST-API that is discovered and controllable by Hue compatible Smart-Home devices like Amazon Alexa or Google Echo.
 
-For this discoverability, an UDP/SSDP stack is implemented.
+For this discoverability, the `oatpp-ssdp` module is used to receive and answer SSDP searches.
 
 This REST-API was implemented with the help of the Hue API unofficial reference documentation by burgestrand.se
 
@@ -23,10 +23,11 @@ This project is using [oatpp](https://github.com/oatpp/oatpp), [oatpp-swagger](h
 |- CMakeLists.txt                        // projects CMakeLists.txt
 |- src/
 |   |
-|   |- controller/                       // Folder containing UserController where all endpoints are declared
+|   |- controller/                       // Folder containing HueDeviceController and SsdpController where all endpoints are declared
 |   |- db/                               // Folder with database mock
 |   |- dto/                              // DTOs are declared here
 |   |- SwaggerComponent.hpp              // Swagger-UI config
+|   |- DeviceDescriptorComponent.hpp     // Component describing your "Hue Hub" (YOU HAVE TO CONFIGURE THIS FILE TO FIT YOUR ENVIRONMENT)
 |   |- AppComponent.hpp                  // Service config
 |   |- App.cpp                           // main() is here
 |
@@ -37,6 +38,26 @@ This project is using [oatpp](https://github.com/oatpp/oatpp), [oatpp-swagger](h
 ---
 
 ### Build and Run
+
+Before you run this example you have to edit `src/DeviceDescriptorComponent.hpp` to match your IP address.
+Since this is only an example and to keep it simple this is not automated or parameterised!
+You have to come up with your own implementation that fits your environment.
+
+```c++
+OATPP_CREATE_COMPONENT(std::shared_ptr<DeviceDescriptor>, deviceDescriptor)("deviceDescriptor", [] {
+auto desc = std::make_shared<DeviceDescriptor>();
+// ToDo: Add your machines Address and Port here! You have to come up with your own way to automate this...
+desc->ipPort = "192.168.100.100:80"; // your real IP and Port your HTTP-Controller is running on
+
+// assignable
+desc->mac = "be5t0a70cafe"; // can be a fake one
+
+// fixed
+desc->sn = "1000000471337";
+desc->uuid = "2f402f80-da50-11e1-9b23-" + desc->mac;
+return desc;
+}());
+```
 
 #### Using CMake
 
