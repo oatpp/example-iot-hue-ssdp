@@ -1,4 +1,4 @@
-# Example-IoT-Hue [![Build Status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.example-crud?branchName=master)](https://dev.azure.com/lganzzzo/lganzzzo/_build?definitionId=9?branchName=master)
+# Example-IoT-Hue [![Build Status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.example-iot-hue-ssdp?branchName=master)](https://dev.azure.com/lganzzzo/lganzzzo/_build/latest?definitionId=29&branchName=master)
 
 Example project how-to create an Philips Hue compatible REST-API that is discovered and controllable by Hue compatible Smart-Home devices like Amazon Alexa or Google Echo.
 
