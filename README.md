@@ -141,7 +141,7 @@ ENDPOINT("PUT", "/api/{username}/lights/{hueId}/state", updateState,
 ```
 
 This endpoint accepts a Philips Hue compatible state-object and sets the state in the internal database accordingly.
-It is called e.g. by Alexa if you tell it  "Alexa, turn on <devicename>".
+It is called e.g. by Alexa if you tell it 🗣️"Alexa, turn on &lt;device name&gt;".
 Finally it returns a "success" or "error" object.
 
 See [Lights (burgestrand.se)](http://www.burgestrand.se/hue-api/api/lights/)
