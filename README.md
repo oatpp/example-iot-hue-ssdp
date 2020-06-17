@@ -2,6 +2,11 @@
 
 Example project how-to create an Philips Hue compatible REST-API that is discovered and controllable by Hue compatible Smart-Home devices like Amazon Alexa or Google Echo.
 
+It demonstrates how Oat++ can be used to develop an Amazon Alexa or Google Home compatible REST-API which emulates Philips Hue bulbs. Oat++ answers to search requests of you favorite SmartHome hub and you can register your fake bulbs to it.  
+After the registration of your fake bulbs to your Hub/Alexa/Google Home, you can control your Oat++ application with  
+🗣️"Alexa, turn on &lt;your fake device name&gt;"!
+
+
 For this discoverability, the `oatpp-ssdp` module is used to receive and answer SSDP searches.
 
 This REST-API was implemented with the help of the Hue API unofficial reference documentation by burgestrand.se
