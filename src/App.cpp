@@ -5,7 +5,7 @@
 
 #include "oatpp-swagger/Controller.hpp"
 
-#include "oatpp/network/server/Server.hpp"
+#include "oatpp/network/Server.hpp"
 
 #include <iostream>
 #include <thread>
@@ -62,8 +62,8 @@ void run() {
 
   /* create http and ssdp server in separate thread to have them run in parallel */
   std::thread http([components](){
-    oatpp::network::server::Server server(components->serverConnectionProvider.getObject(),
-                                          components->serverConnectionHandler.getObject());
+    oatpp::network::Server server(components->serverConnectionProvider.getObject(),
+                                  components->serverConnectionHandler.getObject());
 
     OATPP_LOGD("Server", "Running HTTP on port %s...", components->serverConnectionProvider.getObject()->getProperty("port").toString()->c_str());
 
@@ -71,8 +71,8 @@ void run() {
   });
 
   std::thread ssdp([components](){
-    oatpp::network::server::Server server(components->ssdpConnectionProvider.getObject(),
-                                          components->ssdpStreamHandler.getObject());
+    oatpp::network::Server server(components->ssdpConnectionProvider.getObject(),
+      components->ssdpStreamHandler.getObject());
 
     OATPP_LOGD("Server", "Running SSDP on port %s...", components->ssdpConnectionProvider.getObject()->getProperty("port").toString()->c_str());
 

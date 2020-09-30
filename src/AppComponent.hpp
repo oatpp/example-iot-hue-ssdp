@@ -9,7 +9,7 @@
 
 #include "oatpp/web/server/HttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
-#include "oatpp/network/server/SimpleTCPConnectionProvider.hpp"
+#include "oatpp/network/tcp/server/ConnectionProvider.hpp"
 
 #include "oatpp-ssdp/SimpleSsdpUdpStreamProvider.hpp"
 #include "oatpp-ssdp/SsdpStreamHandler.hpp"
@@ -37,7 +37,7 @@ public:
    *  Create ConnectionProvider component which listens on the port
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider)("httpConnectionProvider", [] {
-    return oatpp::network::server::SimpleTCPConnectionProvider::createShared(80);
+    return oatpp::network::tcp::server::ConnectionProvider::createShared({"localhost", 80});
   }());
 
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::ssdp::SimpleSsdpUdpStreamProvider>, ssdpConnectionProvider)("ssdpConnectionProvider", [] {
@@ -61,7 +61,7 @@ public:
   /**
    *  Create ConnectionHandler component which uses Router component to route requests
    */
-  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, serverConnectionHandler)("httpConnectionHandler", [] {
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, serverConnectionHandler)("httpConnectionHandler", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router, "httpRouter"); // get Router component
     return oatpp::web::server::HttpConnectionHandler::createShared(router);
   }());
