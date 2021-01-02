@@ -1,6 +1,8 @@
 
 #include "Database.hpp"
 #include "oatpp/core/parser/Caret.hpp"
+#include <sstream>
+#include <iomanip>
 
 HueDevice Database::updateFromStateDto(v_int32 id, const oatpp::Object<HueDeviceStateDto> &hueDeviceStateDto) {
   std::lock_guard<oatpp::concurrency::SpinLock> lock(m_lock);
@@ -49,10 +51,10 @@ HueDevice Database::serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDevic
   }
   if(hueDeviceDto->uniqueid){
     oatpp::parser::Caret caret(hueDeviceDto->uniqueid);
-    if (!caret.findChar('-'))
-      throw std::runtime_error("Malformed uniqueid: '-' not found");
-    caret.inc();
-    v_int32 id = caret.parseInt();
+    if (!caret.findText("BE570A70CAFE00"))
+      throw std::runtime_error("Malformed uniqueid: 'BE570A70CAFE00' not found");
+    caret.inc(14);
+    v_int32 id = caret.parseInt(16);
     if (caret.hasError())
       throw std::runtime_error("Malformed uniqueid: Unable to parse id integer");
     hueDevice.id = id;
@@ -62,7 +64,7 @@ HueDevice Database::serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDevic
 
 oatpp::Object<HueDeviceDto> Database::deserializeToDto(const HueDevice& hueDevice){
   auto dto = HueDeviceDto::createShared();
-  dto->uniqueid = oatpp::String("BE570A70CAFE") + "-" + oatpp::String(hueDevice.id + 1); // BEST OAT CAFE!
+  dto->uniqueid = oatpp::String("BE570A70CAFE00") + intToHex(hueDevice.id + 1); // BEST OAT CAFE!
   dto->name = hueDevice.name;
   dto->state->bri = hueDevice.bri;
   dto->state->on = hueDevice.on;
@@ -70,6 +72,16 @@ oatpp::Object<HueDeviceDto> Database::deserializeToDto(const HueDevice& hueDevic
   dto->state->hue = hueDevice.hue;
   dto->state->sat = hueDevice.sat;
   return dto;
+}
+
+oatpp::String Database::intToHex(int value){
+  if(value > 255){
+    throw std::runtime_error("Value cannot be greater than 255");
+  }
+  std::stringstream sstream;
+  sstream << std::setfill ('0') << std::setw(2) << std::hex << value;
+  std::string result = sstream.str();
+  return oatpp::String(result.c_str());
 }
 
 oatpp::Object<HueDeviceDto> Database::createHueDevice(const oatpp::Object<HueDeviceDto>& hueDeviceDto){
@@ -91,6 +103,10 @@ oatpp::Object<HueDeviceDto> Database::updateHueDevice(const oatpp::Object<HueDev
   if(hueDevice.id < 0){
     throw std::runtime_error("HueDevice Id cannot be less than 0");
   }
+  if(hueDevice.id > 255){
+    throw std::runtime_error("HueDevice Id cannot be greater than 255");
+  }
+
   auto it = m_HueDevicesById.find(hueDevice.id);
   if(it != m_HueDevicesById.end()) {
     m_HueDevicesById[hueDevice.id] = hueDevice;
