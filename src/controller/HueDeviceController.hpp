@@ -92,6 +92,15 @@ public:
       "    <serialNumber>" << m_desc->mac << "</serialNumber>\n"
       "    <UDN>uuid:" + m_desc->uuid + "</UDN>\n"
       "    <presentationURL>index.html</presentationURL>\n"
+      "    <serviceList>\n"
+      "      <service>\n"
+      "        <serviceType>(null)</serviceType>\n"
+      "        <serviceId>(null)</serviceId>\n"
+      "        <controlURL>(null)</controlURL>\n"
+      "        <eventSubURL>(null)</eventSubURL>\n"
+      "        <SCPDURL>(null)</SCPDURL>\n"
+      "      </service>\n"
+      "    </serviceList>\n"
       "  </device>\n"
       "</root>";
 
@@ -137,6 +146,12 @@ public:
       char num[32];
       memset(num, 0, 18);
       snprintf(num, 18, "%lu", d+1);
+      if (devices[d]->state->colormode == nullptr) {
+        devices[d]->state->colormode = "ct";
+        if (devices[d]->state->ct == nullptr) {
+          devices[d]->state->ct = 500;
+        }
+      }
       response[num] = devices[d];
     }
     return addHueHeaders(createDtoResponse(Status::CODE_200, response));
@@ -165,6 +180,12 @@ public:
       snprintf(num, 32, "/lights/%d", *hueId.get());
       responseDto->back()->error = {{oatpp::String(num), oatpp::String("Not Found")}};
       auto response = createDtoResponse(Status::CODE_404, responseDto);
+    }
+    if (specific->state->colormode == nullptr) {
+      specific->state->colormode = "ct";
+      if (specific->state->ct == nullptr) {
+        specific->state->ct = 500;
+      }
     }
     return addHueHeaders(createDtoResponse(Status::CODE_200, specific));
   }
@@ -198,16 +219,58 @@ public:
      * ToDo: Implement your "light turning on/off" here!
      * Better: Replace the Database with your state and control logic so the "database" is in sync to your logic.
      */
+    OATPP_LOGI("HueDeviceController", "updateState: Setting light %d %s", *hueId.get(), updated->state->on ? "on" : "off");
 
     responseDto->push_back(oatpp::Object<ResponseTypeDto>::createShared());
-    memset(num, 0, 32);
-    snprintf(num, 32, "/lights/%d/state/on", *hueId.get());
-    responseDto->back()->success = {{oatpp::String(num), updated->state->on}};
+    if (state->on != nullptr) {
+      memset(num, 0, 32);
+      snprintf(num, 32, "/lights/%d/state/on", *hueId.get());
+      if (responseDto->back()->success.get() == nullptr) {
+        responseDto->back()->success = {{oatpp::String(num), updated->state->on}};
+      } else {
+        responseDto->back()->success->push_back({oatpp::String(num), updated->state->on});
+      }
+    }
 
-    responseDto->push_back(oatpp::Object<ResponseTypeDto>::createShared());
-    memset(num, 0, 32);
-    snprintf(num, 32, "/lights/%d/state/bri", *hueId.get());
-    responseDto->back()->success = {{"username", updated->state->bri}};
+    if (state->bri != nullptr) {
+      memset(num, 0, 32);
+      snprintf(num, 32, "/lights/%d/state/bri", *hueId.get());
+      if (responseDto->back()->success.get() == nullptr) {
+        responseDto->back()->success = {{oatpp::String(num), updated->state->bri}};
+      } else {
+        responseDto->back()->success->push_back({oatpp::String(num), updated->state->bri});
+      }
+    }
+
+    if (state->hue != nullptr) {
+      memset(num, 0, 32);
+      snprintf(num, 32, "/lights/%d/state/hue", *hueId.get());
+      if (responseDto->back()->success.get() == nullptr) {
+        responseDto->back()->success = {{oatpp::String(num), updated->state->hue}};
+      } else {
+        responseDto->back()->success->push_back({oatpp::String(num), updated->state->hue});
+      }
+    }
+
+    if (state->sat != nullptr) {
+      memset(num, 0, 32);
+      snprintf(num, 32, "/lights/%d/state/sat", *hueId.get());
+      if (responseDto->back()->success.get() == nullptr) {
+        responseDto->back()->success = {{oatpp::String(num), updated->state->sat}};
+      } else {
+        responseDto->back()->success->push_back({oatpp::String(num), updated->state->sat});
+      }
+    }
+
+    if (state->ct != nullptr) {
+      memset(num, 0, 32);
+      snprintf(num, 32, "/lights/%d/state/ct", *hueId.get());
+      if (responseDto->back()->success.get() == nullptr) {
+        responseDto->back()->success = {{oatpp::String(num), updated->state->ct}};
+      } else {
+        responseDto->back()->success->push_back({oatpp::String(num), updated->state->ct});
+      }
+    }
 
     auto response = createDtoResponse(Status::CODE_200, responseDto);
     return addHueHeaders(response);

@@ -22,7 +22,7 @@ private:
 private:
   HueDevice serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDeviceDto);
   HueDevice updateFromStateDto(v_int32 id, const oatpp::Object<HueDeviceStateDto> &hueDeviceStateDto);
-  oatpp::Object<HueDeviceDto> deserializeToDto(const HueDevice& hueDevice);
+  static oatpp::Object<HueDeviceDto> deserializeToDto(const HueDevice& hueDevice);
 public:
   
   Database()
