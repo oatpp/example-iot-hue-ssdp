@@ -142,17 +142,17 @@ public:
     // list all
     auto devices = m_database->getHueDevices();
     auto response = Fields<oatpp::Object<HueDeviceDto>>::createShared();
-    for (unsigned long d = 0; d < devices->size(); ++d) {
+    for (auto device = devices->begin(); device != devices->end(); device++) {
       char num[32];
       memset(num, 0, 18);
-      snprintf(num, 18, "%lu", d+1);
-      if (devices[d]->state->colormode == nullptr) {
-        devices[d]->state->colormode = "ct";
-        if (devices[d]->state->ct == nullptr) {
-          devices[d]->state->ct = 500;
+      snprintf(num, 18, "%u", *(device->first.get()) + 1);
+      if (device->second->state->colormode == nullptr) {
+        device->second->state->colormode = "ct";
+        if (device->second->state->ct == nullptr) {
+          device->second->state->ct = 500;
         }
       }
-      response[num] = devices[d];
+      response[num] = device->second;
     }
     return addHueHeaders(createDtoResponse(Status::CODE_200, response));
   }

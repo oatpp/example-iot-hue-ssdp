@@ -65,11 +65,11 @@ HueDevice Database::serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDevic
   }
   if(hueDeviceDto->uniqueid){
     oatpp::parser::Caret caret(hueDeviceDto->uniqueid);
-    caret.setPosition(hueDeviceDto->uniqueid->getSize() - 8);
+    caret.setPosition(hueDeviceDto->uniqueid->getSize() - 4);
     v_int32 id = caret.parseInt();
     if (caret.hasError())
       throw std::runtime_error("Malformed uniqueid: Unable to parse id integer");
-    hueDevice.id = id;
+    hueDevice.id = id - 1;
   }
   return hueDevice;
 }
@@ -79,10 +79,11 @@ oatpp::Object<HueDeviceDto> Database::deserializeToDto(const HueDevice& hueDevic
   size_t namehash = std::hash<std::string>{}(hueDevice.name->std_str());
   char idstr[32] = {0};
   if (sizeof(size_t) == 8) {
-    snprintf(idstr, 32, "%016zx%08d", namehash, hueDevice.id);
-  } else {
-    snprintf(idstr, 32, "%08zx%08d", namehash, hueDevice.id);
+    // Mod with the largest prime under 2^32 to map the 64bit hash to 32bit
+    // This will not harm a good hash, yet certainly make weak hashes better.
+    namehash = namehash % 4294967291;
   }
+  snprintf(idstr, 32, "%08zx%04d", namehash, hueDevice.id + 1);
   dto->uniqueid = idstr;
   dto->name = hueDevice.name;
   dto->state->bri = hueDevice.bri;
@@ -131,12 +132,12 @@ oatpp::Object<HueDeviceDto> Database::getHueDeviceById(v_int32 id) {
   return deserializeToDto(it->second);
 }
 
-oatpp::List<oatpp::Object<HueDeviceDto>> Database::getHueDevices(){
+oatpp::PairList<oatpp::UInt32, oatpp::Object<HueDeviceDto>> Database::getHueDevices(){
   std::lock_guard<oatpp::concurrency::SpinLock> lock(m_lock);
-  oatpp::List<oatpp::Object<HueDeviceDto>> result({});
+  oatpp::PairList<oatpp::UInt32, oatpp::Object<HueDeviceDto>> result({});
   auto it = m_HueDevicesById.begin();
   while (it != m_HueDevicesById.end()) {
-    result->push_back(deserializeToDto(it->second));
+    result->emplace_back(it->first, deserializeToDto(it->second));
     it++;
   }
   return result;
