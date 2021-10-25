@@ -20,9 +20,9 @@ private:
   v_int32 m_idCounter; ///< counter to generate HueDeviceIds
   std::unordered_map<v_int32, HueDevice> m_HueDevicesById; ///< Map HueDeviceId to HueDevice
 private:
-  HueDevice serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDeviceDto);
+  static HueDevice serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDeviceDto);
   HueDevice updateFromStateDto(v_int32 id, const oatpp::Object<HueDeviceStateDto> &hueDeviceStateDto);
-  oatpp::Object<HueDeviceDto> deserializeToDto(const HueDevice& hueDevice);
+  static oatpp::Object<HueDeviceDto> deserializeToDto(const HueDevice& hueDevice);
 public:
   
   Database()
@@ -36,13 +36,13 @@ public:
    * @param bri - the initial brightness value
    * @return - ID of the new 'light'
    */
-  v_int32 registerHueDevice(const oatpp::String &name, const oatpp::Boolean &on = false, const oatpp::Int32 &bri = 0);
+  v_int32 registerHueDevice(const oatpp::String &name, const oatpp::Boolean &on = false, const oatpp::Int32 &bri = 254);
 
   oatpp::Object<HueDeviceDto> createHueDevice(const oatpp::Object<HueDeviceDto>& hueDeviceDto);
   oatpp::Object<HueDeviceDto> updateHueDevice(const oatpp::Object<HueDeviceDto>& hueDeviceDto);
   oatpp::Object<HueDeviceDto> updateHueDeviceState(v_int32 id, const oatpp::Object<HueDeviceStateDto>& hueDeviceStateDto);
   oatpp::Object<HueDeviceDto> getHueDeviceById(v_int32 id);
-  oatpp::List<oatpp::Object<HueDeviceDto>> getHueDevices();
+  oatpp::PairList<oatpp::UInt32, oatpp::Object<HueDeviceDto>> getHueDevices();
   bool deleteHueDevice(v_int32 id);
   
 };

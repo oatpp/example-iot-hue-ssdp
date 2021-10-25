@@ -31,10 +31,14 @@ class HueDeviceStateDto : public oatpp::DTO {
   DTO_FIELD(UInt8, sat);
   DTO_FIELD(UInt16, hue);
   DTO_FIELD(UInt16, ct); // white color temperature, 154 (cold) - 500 (warm)
+  DTO_FIELD(String, colormode);
 
   // Fixed values
   DTO_FIELD(List<Int32>, xy) = {0,0};
   DTO_FIELD(Boolean, reachable) = true;
+  DTO_FIELD(String, alert) = "none";
+  DTO_FIELD(String, effect) = "none";
+
 };
 
 class HueDeviceDto : public oatpp::DTO {
@@ -47,7 +51,7 @@ class HueDeviceDto : public oatpp::DTO {
   DTO_FIELD(String, uniqueid); // name-number
 
   // Fixed values
-  DTO_FIELD(String, type) = "Extended Color Light";
+  DTO_FIELD(String, type) = "Dimmable light";
   DTO_FIELD(String, modelid) = "LCT007";
   DTO_FIELD(String, swversion) = "5.105.0.21169";
   DTO_FIELD(oatpp::Object<HueDeviceCapabilitiesDto>, capabilities) = HueDeviceCapabilitiesDto::createShared();

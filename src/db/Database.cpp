@@ -1,6 +1,7 @@
 
 #include "Database.hpp"
 #include "oatpp/core/parser/Caret.hpp"
+#include "oatpp/core/base/StrBuffer.hpp"
 
 HueDevice Database::updateFromStateDto(v_int32 id, const oatpp::Object<HueDeviceStateDto> &hueDeviceStateDto) {
   std::lock_guard<oatpp::concurrency::SpinLock> lock(m_lock);
@@ -16,10 +17,17 @@ HueDevice Database::updateFromStateDto(v_int32 id, const oatpp::Object<HueDevice
 
   if (hueDeviceStateDto->on != nullptr) {
     it->second.on = hueDeviceStateDto->on;
+    if (it->second.on) { // if "on" was set to true an brightness is 0, set it to max brightness
+      if (it->second.bri == 0) {
+        it->second.bri = 254;
+      }
+    }
   }
 
   if (hueDeviceStateDto->hue != nullptr) {
+    // if hue is set from the api-call, colormode "hue" is assumed
     it->second.hue = hueDeviceStateDto->hue;
+    it->second.mode = "hue"; // is this realy the name?
   }
 
   if (hueDeviceStateDto->sat != nullptr) {
@@ -27,7 +35,13 @@ HueDevice Database::updateFromStateDto(v_int32 id, const oatpp::Object<HueDevice
   }
 
   if (hueDeviceStateDto->ct != nullptr) {
+    // if ct is set from the api-call, colormode "ct" is assumed
     it->second.ct = hueDeviceStateDto->ct;
+    it->second.mode = "ct";
+  }
+
+  if (hueDeviceStateDto->colormode != nullptr) {
+    it->second.mode = hueDeviceStateDto->colormode;
   }
 
   return it->second;
@@ -46,29 +60,38 @@ HueDevice Database::serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDevic
       hueDevice.sat = hueDeviceDto->state->sat;
     if (hueDeviceDto->state->ct != nullptr)
       hueDevice.ct = hueDeviceDto->state->ct;
+    if (hueDeviceDto->state->colormode != nullptr)
+      hueDevice.mode = hueDeviceDto->state->colormode;
   }
   if(hueDeviceDto->uniqueid){
     oatpp::parser::Caret caret(hueDeviceDto->uniqueid);
-    if (!caret.findChar('-'))
-      throw std::runtime_error("Malformed uniqueid: '-' not found");
-    caret.inc();
+    caret.setPosition(hueDeviceDto->uniqueid->getSize() - 4);
     v_int32 id = caret.parseInt();
     if (caret.hasError())
       throw std::runtime_error("Malformed uniqueid: Unable to parse id integer");
-    hueDevice.id = id;
+    hueDevice.id = id - 1;
   }
   return hueDevice;
 }
 
 oatpp::Object<HueDeviceDto> Database::deserializeToDto(const HueDevice& hueDevice){
   auto dto = HueDeviceDto::createShared();
-  dto->uniqueid = oatpp::String("BE570A70CAFE") + "-" + oatpp::String(hueDevice.id + 1); // BEST OAT CAFE!
+  size_t namehash = std::hash<std::string>{}(hueDevice.name->std_str());
+  char idstr[32] = {0};
+  if (sizeof(size_t) == 8) {
+    // Mod with the largest prime under 2^32 to map the 64bit hash to 32bit
+    // This will not harm a good hash, yet certainly make weak hashes better.
+    namehash = namehash % 4294967291;
+  }
+  snprintf(idstr, 32, "%08zx%04d", namehash, hueDevice.id + 1);
+  dto->uniqueid = idstr;
   dto->name = hueDevice.name;
   dto->state->bri = hueDevice.bri;
   dto->state->on = hueDevice.on;
   dto->state->ct = hueDevice.ct;
   dto->state->hue = hueDevice.hue;
   dto->state->sat = hueDevice.sat;
+  dto->state->colormode = hueDevice.mode;
   return dto;
 }
 
@@ -109,12 +132,12 @@ oatpp::Object<HueDeviceDto> Database::getHueDeviceById(v_int32 id) {
   return deserializeToDto(it->second);
 }
 
-oatpp::List<oatpp::Object<HueDeviceDto>> Database::getHueDevices(){
+oatpp::PairList<oatpp::UInt32, oatpp::Object<HueDeviceDto>> Database::getHueDevices(){
   std::lock_guard<oatpp::concurrency::SpinLock> lock(m_lock);
-  oatpp::List<oatpp::Object<HueDeviceDto>> result({});
+  oatpp::PairList<oatpp::UInt32, oatpp::Object<HueDeviceDto>> result({});
   auto it = m_HueDevicesById.begin();
   while (it != m_HueDevicesById.end()) {
-    result->push_back(deserializeToDto(it->second));
+    result->emplace_back(it->first, deserializeToDto(it->second));
     it++;
   }
   return result;

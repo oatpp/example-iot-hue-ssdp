@@ -145,3 +145,15 @@ It is called e.g. by Alexa if you tell it 🗣️"Alexa, turn on &lt;device name
 Finally it returns a "success" or "error" object.
 
 See [Lights (burgestrand.se)](http://www.burgestrand.se/hue-api/api/lights/)
+
+## Thanks
+
+- To @DavidHamburg for spotting an issue with the old device id's that prevented Alexa from finding the devices
+
+## Notes
+
+The newest version of the example shows the correct icon for the device in the Amazon Alexa app.
+Support for color-temperature and brightness was added too.
+Setting a custom color is still not forking properly.
+While you can set a custom color, the Alexa app will show you an error and won't show the color you have set.
+Feel free to fix this and send us your PR!

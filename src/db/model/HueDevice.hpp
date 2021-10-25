@@ -11,6 +11,7 @@ class HueDevice {
 public:
   v_int32 id;
   oatpp::String name;
+  oatpp::String mode;
   oatpp::Boolean on = false;
   oatpp::UInt8 bri = (v_uint8)0;
   oatpp::UInt8 sat = (v_uint8)0;
