@@ -108,8 +108,8 @@ public:
   {
     if (userRegister->username == nullptr) {
       userRegister->username = "OatppSsdpHueDefaultUser_________________";
-      gen_random((char*)userRegister->username->getData()+23, 17);
-      OATPP_LOGD("HueDeviceController", "POST on /api with empty user, generated '%s'",userRegister->username->getData());
+      gen_random((char*)userRegister->username->data() + 23, 17);
+      OATPP_LOGD("HueDeviceController", "POST on /api with empty user, generated '%s'", userRegister->username->c_str());
     } else {
       OATPP_LOGD("HueDeviceController", "POST on /api for user '%s'", userRegister->username->c_str());
     }

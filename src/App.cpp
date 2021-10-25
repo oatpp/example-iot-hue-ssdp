@@ -34,25 +34,19 @@ void run() {
   /* get the router for HTTP calls */
   auto router = components->httpRouter.getObject();
 
-  /* create the Hue HTTP REST controller */
-  auto hueHttpRest = HueDeviceController::createShared();
-
   /* create the Swagger endpoint documentation engine*/
-  auto docEndpoints = oatpp::swagger::Controller::Endpoints::createShared();
-  docEndpoints->pushBackAll(hueHttpRest->getEndpoints()); // add the Hue HTTP REST calls to the swagger documentation engine
+  oatpp::web::server::api::Endpoints docEndpoints;
+
+  /* create the Hue HTTP REST controller */
+  docEndpoints.append(router->addController(HueDeviceController::createShared())->getEndpoints());
 
   /* create swagger UI controller */
-  auto swaggerController = oatpp::swagger::Controller::createShared(docEndpoints);
-  docEndpoints->pushBackAll(hueHttpRest->getEndpoints());
-
-  /* add HTTP endpoints to the HTTP router */
-  swaggerController->addEndpointsToRouter(router);
-  hueHttpRest->addEndpointsToRouter(router);
+  router->addController(oatpp::swagger::Controller::createShared(docEndpoints));
 
   /* create the SSDP-Router and SSDP-Controller and add its endpoints to the SSDP-Router */
   auto ssdpRouter = components->ssdpRouter.getObject();
-  auto ssdpController = SsdpController::createShared();
-  ssdpController->addEndpointsToRouter(ssdpRouter);
+
+  ssdpRouter->addController(SsdpController::createShared());
 
   OATPP_LOGD("SSDPRouter", "Mappings:");
   ssdpRouter->logRouterMappings();
