@@ -1,7 +1,6 @@
 
 #include "Database.hpp"
 #include "oatpp/core/parser/Caret.hpp"
-#include "oatpp/core/base/StrBuffer.hpp"
 
 HueDevice Database::updateFromStateDto(v_int32 id, const oatpp::Object<HueDeviceStateDto> &hueDeviceStateDto) {
   std::lock_guard<oatpp::concurrency::SpinLock> lock(m_lock);
@@ -65,7 +64,7 @@ HueDevice Database::serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDevic
   }
   if(hueDeviceDto->uniqueid){
     oatpp::parser::Caret caret(hueDeviceDto->uniqueid);
-    caret.setPosition(hueDeviceDto->uniqueid->getSize() - 4);
+    caret.setPosition(hueDeviceDto->uniqueid->size() - 4);
     v_int32 id = caret.parseInt();
     if (caret.hasError())
       throw std::runtime_error("Malformed uniqueid: Unable to parse id integer");
@@ -76,7 +75,7 @@ HueDevice Database::serializeFromDto(const oatpp::Object<HueDeviceDto>& hueDevic
 
 oatpp::Object<HueDeviceDto> Database::deserializeToDto(const HueDevice& hueDevice){
   auto dto = HueDeviceDto::createShared();
-  size_t namehash = std::hash<std::string>{}(hueDevice.name->std_str());
+  size_t namehash = std::hash<std::string>{}(*hueDevice.name);
   char idstr[32] = {0};
   if (sizeof(size_t) == 8) {
     // Mod with the largest prime under 2^32 to map the 64bit hash to 32bit
